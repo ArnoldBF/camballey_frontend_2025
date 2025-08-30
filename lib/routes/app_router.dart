@@ -1,9 +1,12 @@
-import 'package:camballey_frontend_2025/presentation/auth/profile_screen.dart';
-import 'package:camballey_frontend_2025/presentation/auth/register_screen.dart';
 import 'package:flutter/material.dart';
+
 import '../presentation/auth/login_screen.dart';
-import '../presentation/driver_view.dart';
-import '../presentation/passenger_view.dart';
+import '../presentation/auth/profile_screen.dart';
+import '../presentation/auth/register_screen.dart';
+
+// Importa SOLO los símbolos necesarios para evitar colisiones
+import '../presentation/driver_view.dart' show DriverView;
+import '../presentation/passenger_view.dart' show PassengerView;
 
 class Routes {
   static const login = '/login';
@@ -14,13 +17,13 @@ class Routes {
 }
 
 class AppRouter {
-  // Tabla de rutas directas
+  // Mapa de rutas directas
   static Map<String, WidgetBuilder> get routes => {
         Routes.login: (_) => const LoginScreen(),
-        Routes.driver: (_) => const DriverView(),
+        Routes.driver: (_) => DriverView(),       // sin const por si tu vista no es const
+        Routes.passenger: (_) => PassengerView(), // idem
         Routes.profile: (_) => const ProfileScreen(),
-        Routes.passenger: (_) => const PassengerView(),
-        Routes.register: (_) => const RegisterScreen(), // reemplaza si tienes pantalla de registro
+        Routes.register: (_) => const RegisterScreen(),
       };
 
   // Fallback opcional
@@ -29,9 +32,9 @@ class AppRouter {
       case Routes.login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case Routes.driver:
-        return MaterialPageRoute(builder: (_) => const DriverView());
+        return MaterialPageRoute(builder: (_) => DriverView());
       case Routes.passenger:
-        return MaterialPageRoute(builder: (_) => const PassengerView());
+        return MaterialPageRoute(builder: (_) => PassengerView());
       case Routes.profile:
         return MaterialPageRoute(builder: (_) => const ProfileScreen());
       case Routes.register:
