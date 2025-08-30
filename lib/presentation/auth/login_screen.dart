@@ -32,25 +32,28 @@ class _LoginScreenState extends State<LoginScreen> {
   bool get _isEmail => Validators.looksLikeEmail(_userCtrl.text);
 
   Future<void> _startLogin() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _loading = true);
-    try {
-      if (_isEmail) {
-        await _auth.signInWithEmail(_userCtrl.text, _passCtrl.text);
-        await _postLogin();
-      } else {
-        await _auth.startPhoneOtp(_userCtrl.text);
-        setState(() => _waitingSms = true);
-        _snack('Te enviamos un SMS con el código');
-      }
-    } on AuthException catch (e) {
-      _snack(e.message);
-    } catch (e) {
-      _snack('Error: $e');
-    } finally {
-      setState(() => _loading = false);
+  final isValid = _formKey.currentState?.validate() ?? false;
+  if (!isValid) return;
+
+  setState(() => _loading = true);
+  try {
+    if (_isEmail) {
+      await _auth.signInWithEmail(_userCtrl.text, _passCtrl.text);
+      await _postLogin();
+    } else {
+      await _auth.startPhoneOtp(_userCtrl.text);
+      if (!mounted) return;
+      setState(() => _waitingSms = true);
+      _snack('Te enviamos un SMS con el código');
     }
+  } on AuthException catch (e) {
+    _snack(e.message);
+  } catch (e) {
+    _snack('Error: $e');
+  } finally {
+    if (mounted) setState(() => _loading = false);
   }
+}
 
   Future<void> _confirmOtp() async {
     if (_smsCtrl.text.trim().length < 4) return _snack('Ingresa el código SMS');
@@ -93,6 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _loginStep() {
     return Form(
       key: _formKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         const SizedBox(height: 24),
         Text('Iniciar sesión', style: Theme.of(context).textTheme.headlineMedium),
@@ -111,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: 12),
 
-        if (_isEmail)
+        // if (_isEmail)
           TextFormField(
             controller: _passCtrl,
             obscureText: true,
@@ -123,14 +127,14 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
 
         const SizedBox(height: 12),
-        TextFormField(
-          controller: _nameCtrl,
-          decoration: const InputDecoration(
-            labelText: 'Nombre (para perfil)',
-            prefixIcon: Icon(Icons.badge_outlined),
-          ),
-        ),
-        const SizedBox(height: 12),
+        // TextFormField(
+        //   controller: _nameCtrl,
+        //   decoration: const InputDecoration(
+        //     labelText: 'Nombre (para perfil)',
+        //     prefixIcon: Icon(Icons.badge_outlined),
+        //   ),
+        // ),
+        // const SizedBox(height: 12),
 
         DropdownButtonFormField<UserType>(
           value: _role,
