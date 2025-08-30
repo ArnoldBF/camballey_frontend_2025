@@ -43,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
         (_selectedRole == 'Chofer') ? r.Routes.driver : r.Routes.passenger;
     Navigator.of(context).pushReplacementNamed(route);
   }
+
   void _snack(String m) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
   bool get _isEmail => Validators.looksLikeEmail(_userCtrl.text);
 
@@ -107,6 +108,42 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }*/
+
+   // --- LOGO helper ---
+  Widget _buildLogo() {
+  final primary = Theme.of(context).colorScheme.primary;
+  return Padding(
+    padding: const EdgeInsets.only(top: 12, bottom: 12),
+    child: Hero(
+      tag: 'app_logo',
+      child: Container(
+        width: 190,
+        height: 190,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: primary, width: 3),
+          boxShadow: const [
+            BoxShadow(
+              blurRadius: 10,
+              spreadRadius: 1,
+              offset: Offset(0, 4),
+              color: Color(0x1A000000), // sombra sutil
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias, // recorta el contenido al círculo
+        child: Image.asset(
+          'assets/images/logo.png',
+          width: 50,
+          height:50,
+          fit: BoxFit.cover, // recorta para llenar el círculo
+          errorBuilder: (_, __, ___) =>
+              const Icon(Icons.directions_bus, size: 72),
+        ),
+      ),
+    ),
+  );
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,7 +158,8 @@ class _LoginScreenState extends State<LoginScreen> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  const SizedBox(height: 80),
+                  _buildLogo(),
+                  const SizedBox(height: 10),
                   const Text('Iniciar sesión',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 32, fontWeight: FontWeight.w600)),
@@ -153,18 +191,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
 
                   // Rol
-                  DropdownButtonFormField<String>(
-                    value: _selectedRole,
-                    decoration: const InputDecoration(
-                      labelText: 'Tipo de usuario',
-                      prefixIcon: Icon(Icons.person_outline),
-                    ),
-                    items: _roles
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                        .toList(),
-                    onChanged: (v) => setState(() => _selectedRole = v ?? 'Chofer'),
-                  ),
-                  const SizedBox(height: 28),
+                  // DropdownButtonFormField<String>(
+                  //   value: _selectedRole,
+                  //   decoration: const InputDecoration(
+                  //     labelText: 'Tipo de usuario',
+                  //     prefixIcon: Icon(Icons.person_outline),
+                  //   ),
+                  //   items: _roles
+                  //       .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  //       .toList(),
+                  //   onChanged: (v) => setState(() => _selectedRole = v ?? 'Chofer'),
+                  // ),
+                  // const SizedBox(height: 28),
 
                   // Botón
                   SizedBox(
@@ -174,7 +212,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text('Entrar'),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('¿No tienes cuenta?'),
+                      TextButton(
+                        onPressed: () => Navigator.pushNamed(context, r.Routes.register),
+                        child: const Text('Regístrarme Ahora'),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

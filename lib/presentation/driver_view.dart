@@ -1,3 +1,5 @@
+import 'package:camballey_frontend_2025/data/services/auth_service.dart';
+import 'package:camballey_frontend_2025/routes/app_router.dart';
 import 'package:flutter/material.dart';
 
 class DriverView extends StatelessWidget {
@@ -8,22 +10,40 @@ class DriverView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
       appBar: AppBar(
-        title: const Text('Home', style: TextStyle(color: Colors.black54)),
+        title: const Text('Conductor', style: TextStyle(color: Colors.black54)),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
         iconTheme: const IconThemeData(color: Colors.black54),
+        actions: const [
+          _AccountMenu(),
+          SizedBox(width: 4),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        children: const [
+        children:  [
           _Header(name: 'José Armando', line: 'Línea 74'),
           SizedBox(height: 14),
-          _EarningsCard(
+          const _EarningsCard(
             title: 'Viaje N°3',
             amount: '350,00 Bs',
             subtitle: 'Total Día',
             subAmount: '700,20 Bs',
+          ),
+
+          const SizedBox(height: 12),
+
+          // ⬇️ Nuevo: fila con "Cobrar" y "Pagar"
+          _ActionButtons(
+            onCobrar: () {
+              // TODO: navega a collect_screen.dart
+              // Navigator.pushNamed(context, '/driver/collect');
+            },
+            onPagar: () {
+              // TODO: navega a pay_screen.dart
+              // Navigator.pushNamed(context, '/passenger/pay');
+            },
           ),
           SizedBox(height: 18),
           _RecentSection(),
@@ -236,4 +256,123 @@ class _Tile extends StatelessWidget {
       ),
     );
   }
+}
+
+
+class _ActionButtons extends StatelessWidget {
+  final VoidCallback onCobrar;
+  final VoidCallback onPagar;
+  const _ActionButtons({required this.onCobrar, required this.onPagar});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        Expanded(
+          child: FilledButton.icon(
+            onPressed: onCobrar,
+            icon: const Icon(Icons.point_of_sale),
+            label: const Text('Cobrar'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: onPagar,
+            icon: const Icon(Icons.payments_outlined),
+            label: const Text('Pagar'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              side: BorderSide(color: scheme.primary, width: 1.6),
+              foregroundColor: scheme.primary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+
+class _AccountMenu extends StatelessWidget {
+  const _AccountMenu();
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<_AccountAction>(
+      tooltip: 'Cuenta',
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (value) async {
+        switch (value) {
+          case _AccountAction.profile:
+            // TODO: ir a pantalla de perfil si la tienes
+            Navigator.pushNamed(context, Routes.profile);
+            break;
+          case _AccountAction.logout:
+            final ok = await _confirmLogout(context);
+            if (ok == true) {
+              final auth = AuthService();
+              await auth.signOut();
+              if (context.mounted) {
+                // Vuelve al login y limpia el stack
+                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+              }
+            }
+            break;
+        }
+      },
+      itemBuilder: (ctx) => [
+        const PopupMenuItem(
+          value: _AccountAction.profile,
+          child: ListTile(
+            leading: Icon(Icons.person_outline),
+            title: Text('Perfil'),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+        const PopupMenuDivider(),
+        const PopupMenuItem(
+          value: _AccountAction.logout,
+          child: ListTile(
+            leading: Icon(Icons.logout),
+            title: Text('Cerrar sesión'),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: CircleAvatar(
+          radius: 18,
+          backgroundColor: const Color(0xFFEEF2FF),
+          child: Icon(Icons.person, color: Theme.of(context).colorScheme.primary),
+        ),
+      ),
+    );
+  }
+}
+
+enum _AccountAction { profile, logout }
+
+Future<bool?> _confirmLogout(BuildContext context) {
+  return showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Cerrar sesión'),
+      content: const Text('¿Deseas salir de tu cuenta?'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Salir')),
+      ],
+    ),
+  );
 }
