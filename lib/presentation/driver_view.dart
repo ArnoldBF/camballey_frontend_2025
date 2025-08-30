@@ -34,17 +34,16 @@ class DriverView extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // ⬇️ Nuevo: fila con "Cobrar" y "Pagar"
-          _ActionButtons(
-            onCobrar: () {
-              // TODO: navega a collect_screen.dart
-              // Navigator.pushNamed(context, '/driver/collect');
-            },
-            onPagar: () {
-              // TODO: navega a pay_screen.dart
-              // Navigator.pushNamed(context, '/passenger/pay');
-            },
-          ),
+          // _ActionButtons(
+          //   onCobrar: () {
+          //     // TODO: navega a collect_screen.dart
+          //     // Navigator.pushNamed(context, '/driver/collect');
+          //   },
+          //   onPagar: () {
+          //     // TODO: navega a pay_screen.dart
+          //     // Navigator.pushNamed(context, '/passenger/pay');
+          //   },
+          // ),
           SizedBox(height: 18),
           _RecentSection(),
           SizedBox(height: 16),
@@ -126,9 +125,25 @@ class _EarningsCard extends StatelessWidget {
               ),
             ],
           ),
-          const Positioned(
-            right: 8, bottom: 8,
-            child: Icon(Icons.directions_bus_filled, size: 64, color: Colors.white24),
+          Positioned(
+            right: 10,
+            // left: 10,
+            bottom: 8,
+            child: Image.asset(
+              '/images/Bus.png',
+              width: 250,
+              height: 100,
+              // fit: BoxFit.contain,
+              // Tinte para que se vea como watermark
+              // color: Colors.white60,
+              colorBlendMode: BlendMode.srcIn,
+              // Fallback si el asset no carga
+              errorBuilder: (_, __, ___) => const Icon(
+                Icons.directions_bus_filled,
+                size: 64,
+                color: Colors.white24,
+              ),
+            ),
           ),
         ],
       ),

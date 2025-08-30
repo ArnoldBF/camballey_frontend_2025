@@ -58,12 +58,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       // 1) Si hay correo, crea cuenta por email+password
       if (email.isNotEmpty) {
-        await _auth.signUpWithEmailPassword(email: email, password: pass);
+        // await _auth.signUpWithEmailPassword(email: email, password: pass);
       }
 
       // 2) Si hay teléfono, envía OTP para terminar registro
       if (phone.isNotEmpty) {
-        await _auth.signUpWithPhone(phone);
+        // await _auth.signUpWithPhone(phone);
         if (!mounted) return;
         setState(() => _waitingOtp = true); // paso 2
         _snack('Te enviamos un código por SMS');
@@ -71,7 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
 
       // 3) Si solo fue email, ya podemos crear perfil y mandar a login
-      await _auth.upsertProfile(role: _role.value, fullName: _nameCtrl.text.trim());
+      // await _auth.upsertProfile(role: _role.value, fullName: _nameCtrl.text.trim());
       if (mounted) {
         _snack('Cuenta creada. Revisa tu correo si requiere verificación.');
         Navigator.of(context).pushNamedAndRemoveUntil(Routes.login, (r) => false);
@@ -91,8 +91,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
     setState(() => _loading = true);
     try {
-      await _auth.confirmPhoneSignup(phone: _phoneCtrl.text.trim(), code: code);
-      await _auth.upsertProfile(role: _role.value, fullName: _nameCtrl.text.trim());
+      // await _auth.confirmPhoneSignup(phone: _phoneCtrl.text.trim(), code: code);
+      // await _auth.upsertProfile(role: _role.value, fullName: _nameCtrl.text.trim());
       if (mounted) {
         _snack('Registro completado ✅');
         Navigator.of(context).pushNamedAndRemoveUntil(Routes.login, (r) => false);

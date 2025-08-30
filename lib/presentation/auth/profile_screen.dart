@@ -30,10 +30,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _load() async {
     final auth = AuthService();
     try {
-      final p = await auth.getMyProfile();
+      // final p = await auth.getMyProfile();
       setState(() {
-        _profile = p;
-        _nameCtrl.text = p?.fullName ?? '';
+        // _profile = p;
+        // _nameCtrl.text = p?.fullName ?? '';
         _loading = false;
       });
     } catch (e) {
@@ -61,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final auth = AuthService();
     setState(() => _saving = true);
     try {
-      await auth.updateProfileName(_nameCtrl.text.trim());
+      // await auth.updateProfileName(_nameCtrl.text.trim());
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Perfil actualizado ✅')),

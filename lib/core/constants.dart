@@ -1,6 +1,7 @@
 class K {
-  static const useSupabase = false;
-  // Reemplaza por tus valores
-  static const supabaseUrl = 'https://YOUR_PROJECT.supabase.co';
-  static const supabaseAnonKey = 'YOUR_ANON_KEY';
+  // Cambia por tu backend
+  static const apiBaseUrl = 'https://camballeybacked2025-production.up.railway.app/api';
+
+  // Activa mock si aún no tienes backend listo
+  // static const useMock = false;
 }
