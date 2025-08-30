@@ -1,8 +1,9 @@
-import 'package:camballey_frontend_2025/presentation/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'routes/app_router.dart';
 import 'data/services/api_client.dart';
+import 'presentation/auth/login_screen.dart';
+
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -12,42 +13,42 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _ready = false;
+
   @override
   void initState() {
     super.initState();
     _boot();
   }
 
-   Future<void> _boot() async {
+  Future<void> _boot() async {
     try {
-      await ApiClient.init(); // ahora puede dejar supa en null (MOCK) sin romper
-    } catch (e, st) {
-      // Log por si algo pasa en init
-      debugPrint('Init error: $e\n$st');
+      await ApiClient.init(); // ok si queda en MOCK
+    } catch (_) {
+      // silenciar en MVP
     } finally {
       if (mounted) setState(() => _ready = true);
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     if (!_ready) {
       return MaterialApp(
         theme: buildAppTheme(),
         debugShowCheckedModeBanner: false,
-        home: const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+        home: const Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
 
-    // ⚠️ Deja SOLO "home" por ahora.
-    // No uses initialRoute ni onGenerateRoute hasta que confirmes que dibuja.
     return MaterialApp(
       title: 'Transporte Público',
       theme: buildAppTheme(),
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      home: const LoginScreen(),                 // inicio simple y seguro
+      routes: AppRouter.routes,                  // rutas registradas
+      onGenerateRoute: AppRouter.onGenerateRoute, // fallback si usas pushNamed con otra ruta
+      onUnknownRoute: (_) =>
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
     );
   }
 }
