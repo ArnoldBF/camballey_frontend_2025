@@ -1,3 +1,4 @@
+import 'package:camballey_frontend_2025/presentation/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'routes/app_router.dart';
@@ -14,25 +15,39 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _init();
+    _boot();
   }
 
-  Future<void> _init() async {
-    await ApiClient.init(); // Supabase init
-    if (mounted) setState(() => _ready = true);
+   Future<void> _boot() async {
+    try {
+      await ApiClient.init(); // ahora puede dejar supa en null (MOCK) sin romper
+    } catch (e, st) {
+      // Log por si algo pasa en init
+      debugPrint('Init error: $e\n$st');
+    } finally {
+      if (mounted) setState(() => _ready = true);
+    }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     if (!_ready) {
-      return const MaterialApp(home: Scaffold(body: Center(child: CircularProgressIndicator())));
+      return MaterialApp(
+        theme: buildAppTheme(),
+        debugShowCheckedModeBanner: false,
+        home: const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
     }
+
+    // ⚠️ Deja SOLO "home" por ahora.
+    // No uses initialRoute ni onGenerateRoute hasta que confirmes que dibuja.
     return MaterialApp(
       title: 'Transporte Público',
       theme: buildAppTheme(),
-      onGenerateRoute: onGenerateRoute,
-      initialRoute: '/',
       debugShowCheckedModeBanner: false,
+      home: const LoginScreen(),
     );
   }
 }
