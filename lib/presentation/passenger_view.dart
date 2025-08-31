@@ -1,5 +1,6 @@
 import 'package:camballey_frontend_2025/data/services/api_client.dart';
 import 'package:camballey_frontend_2025/data/services/auth_service.dart';
+import 'package:camballey_frontend_2025/presentation/payments/multi_pagos.dart';
 import 'package:camballey_frontend_2025/data/services/wallet_service.dart';
 import 'package:flutter/material.dart';
 
@@ -39,8 +40,11 @@ class PassengerView extends StatelessWidget {
           const SizedBox(height: 14),
 
           _ActionButtons(
-            onCobrar: () {
-              // TODO: flujo de cobro múltiple
+            onCobrar: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MultiPagosPage()),
+              );
             },
             onPagar: () async {
               final interno = await showPopupPago(context);

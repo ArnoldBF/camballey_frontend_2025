@@ -5,7 +5,7 @@ import '../presentation/auth/profile_screen.dart';
 import '../presentation/auth/register_screen.dart';
 
 // Importa SOLO los símbolos necesarios para evitar colisiones
-import '../presentation/driver_view.dart' show DriverView;
+import '../presentation/driver/driver_view.dart' show DriverView;
 import '../presentation/passenger_view.dart' show PassengerView;
 
 class Routes {
