@@ -1,3 +1,4 @@
+import 'package:camballey_frontend_2025/data/services/auth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -58,19 +59,8 @@ class _DriverViewState extends State<DriverView> {
 
   @override
   State<DriverView> createState() => _DriverViewState();
-}
-
-class _DriverViewState extends State<DriverView> {
-
-  late Future<List<Trip>> _future;
   
-   @override
-  void initState() {
-    super.initState();
-    _future = TripService().getMyTrips();
-  }
-
-  String _formatBs(num v) => 'Bs ${v.toStringAsFixed(2)}';
+   String _formatBs(num v) => 'Bs ${v.toStringAsFixed(2)}';
 
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
@@ -115,4 +105,9 @@ class _DriverViewState extends State<DriverView> {
       ),
     );
   }
+
 }
+
+
+ 
+
