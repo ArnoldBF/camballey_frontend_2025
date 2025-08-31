@@ -15,8 +15,8 @@ import 'package:camballey_frontend_2025/data/services/socket_service.dart';
 class DriverView extends StatefulWidget {
   const DriverView({
     super.key,
-    this.userId = 2,          // ID del chofer que recibirá saldoAbonado
-    this.socketBaseUrl,       // p.ej. http://10.0.2.2:3000 | http://localhost:3000 | https://tu-dominio
+    this.userId = 2,        // ID del chofer que recibirá saldoAbonado
+    this.socketBaseUrl,     // p.ej. http://10.0.2.2:3000 | http://localhost:3000 | https://tu-dominio
   });
 
   final int userId;
@@ -32,21 +32,19 @@ class _DriverViewState extends State<DriverView> {
     if (widget.socketBaseUrl != null && widget.socketBaseUrl!.isNotEmpty) {
       return widget.socketBaseUrl!;
     }
-    // 2) Producción por defecto (Railway u otro host)
+    // 2) Producción por defecto
     const prod = 'https://camballeybacked2025-production.up.railway.app';
-    // 3) Si estás en local:
-    //    - Web/iOS/macOS/Windows: localhost
-    //    - Android emulador: 10.0.2.2
-    if (kIsWeb) return prod; // en web te conviene consumir el host público
+    // 3) Local: podrías cambiar a 10.0.2.2:3000 si lo necesitas.
+    if (kIsWeb) return prod;
     return prod;
   }
 
   @override
   void initState() {
     super.initState();
-    final url = _resolveSocketUrl(); // ¡IMPORTANTE! No apuntes a /api ni a rutas REST
+    final url = _resolveSocketUrl(); // ¡No pongas /api aquí!
     SocketService.I.connect(
-      baseUrl: url,    // EJEMPLO correcto: https://mi-backend.com  (sin /api)
+      baseUrl: url,
       userId: widget.userId,
     );
   }
@@ -57,17 +55,14 @@ class _DriverViewState extends State<DriverView> {
     super.dispose();
   }
 
-  @override
-  State<DriverView> createState() => _DriverViewState();
-  
-   String _formatBs(num v) => 'Bs ${v.toStringAsFixed(2)}';
-
+  String _formatBs(num v) => 'Bs ${v.toStringAsFixed(2)}';
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
   Widget build(BuildContext context) {
     final name = currentFullName ?? 'Usuario';
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
       appBar: AppBar(
@@ -83,20 +78,20 @@ class _DriverViewState extends State<DriverView> {
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        children:  [
+        children: [
           DriverHeader(name: name, line: 'Línea 74'),
-          SizedBox(height: 14),
-          EarningsCard(
+          const SizedBox(height: 14),
+          const EarningsCard(
             title: 'Viaje N°3',
             amount: '350,00 Bs',
             subtitle: 'Total Día',
             subAmount: '700,20 Bs',
           ),
-          SizedBox(height: 18),
-          RecentSection(),
-          SizedBox(height: 16),
-          DriverMainMenu(),
-          SizedBox(height: 24),
+          const SizedBox(height: 18),
+          const RecentSection(),
+          const SizedBox(height: 16),
+          const DriverMainMenu(),
+          const SizedBox(height: 24),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -105,9 +100,4 @@ class _DriverViewState extends State<DriverView> {
       ),
     );
   }
-
 }
-
-
- 
-

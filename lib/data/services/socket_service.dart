@@ -10,11 +10,11 @@ class SocketService {
   IO.Socket? _socket;
 
   /// Conexión al servidor de **Socket.IO**.
-  /// [baseUrl] debe ser SOLO el host del socket (ej: http://10.0.2.2:3000 o https://tu-backend.com)
+  /// [baseUrl] SOLO el host del socket (p. ej. http://10.0.2.2:3000 o https://tu-backend.com).
   /// **No** pongas /api ni rutas REST aquí.
   void connect({
     required String baseUrl,
-    required int userId// debe coincidir con el configurado en el server
+    required int userId, // debe coincidir con el configurado en el server
   }) async {
     await NotificationService.I.init();
 
@@ -25,6 +25,7 @@ class SocketService {
       baseUrl,
       IO.OptionBuilder()
           .setTransports(['websocket'])
+          .setPath('/socket.io/')      // <-- path por defecto de Socket.IO
           .enableReconnection()
           .setReconnectionAttempts(999)
           .setReconnectionDelay(1000)
@@ -35,33 +36,40 @@ class SocketService {
 
     _socket!.onConnect((_) {
       debugPrint('[SOCKET] connected with id: ${_socket!.id}');
-      final room = 'usuario_$userId';
-      _socket!.emit('join', room); // te unes al room de ese usuario
-      debugPrint('[SOCKET] join -> $room');
+      final sala = 'usuario_$userId';
+      _socket!.emit('join', {'sala': sala}); // <-- tu backend espera { sala }
+      debugPrint('[SOCKET] join -> $sala');
     });
 
     _socket!.on('joined', (data) {
       debugPrint('[SOCKET] joined ack: $data');
     });
 
-    // Evento que emite tu backend (para chofer)
+    // Evento que emite tu backend (para CHOFER)
     _socket!.on('saldoAbonado', (data) {
       debugPrint('[SOCKET] saldoAbonado => $data');
       final monto = (data is Map && data['montoAbonado'] != null)
           ? data['montoAbonado'].toString()
           : '';
+      final emisor = (data is Map && data['pasajeroEmisor'] != null)
+          ? data['pasajeroEmisor'].toString()
+          : 'Pasajero';
+      final saldo = (data is Map && data['nuevoSaldo'] != null)
+          ? data['nuevoSaldo'].toString()
+          : '';
+
       NotificationService.I.show(
         title: 'Pago recibido',
-        body: monto.isEmpty ? 'Saldo abonado.' : 'Se abonó $monto Bs a tu saldo.',
+        body: 'De: $emisor · $monto Bs · Saldo: $saldo Bs',
       );
     });
 
-    // (Opcional) si quisieras escuchar "saldoDescontado" para el pasajero
+    // (Opcional) para el PASAJERO
     _socket!.on('saldoDescontado', (data) {
       debugPrint('[SOCKET] saldoDescontado => $data');
     });
 
-    // Debug útil
+    // Debug / errores
     _socket!.onAny((event, data) => debugPrint('[SOCKET] <$event> $data'));
     _socket!.onConnectError((e) => debugPrint('[SOCKET] connect_error: $e'));
     _socket!.onError((e) => debugPrint('[SOCKET] error: $e'));
