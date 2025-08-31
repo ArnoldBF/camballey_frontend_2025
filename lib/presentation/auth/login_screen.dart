@@ -89,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
         debugPrint('[NAV] -> Routes.driver');
         Navigator.of(context).pushNamedAndRemoveUntil(r.Routes.driver, (_) => false);
       } else {
-        debugPrint('[NAV] -> Routes.passenger');
+        debugPrint('[NAV] -> Routes.passenger');  
         Navigator.of(context).pushNamedAndRemoveUntil(r.Routes.passenger, (_) => false);
       }
     } catch (e) {

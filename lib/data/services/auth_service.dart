@@ -15,6 +15,7 @@ class ApiException implements Exception {
   @override
   String toString() => message;
 }
+String? currentFullName;
 
 class AuthService {
 
@@ -44,7 +45,10 @@ class AuthService {
       await ApiClient.setToken(token);
 
       final claims = _decodeJwt(token);
+      debugPrint('Datos del usuario en el token: $claims');
       // Tu backend pone el rol adentro del token. En el ejemplo aparece "rol":2.
+      currentFullName = claims['fullName'] as String?;
+      debugPrint('Datos del usuario en el token: $currentFullName');
       final role = (claims['rol'] ?? claims['role'] ?? claims['roleId']) as int?;
       return role; // p.ej. 1=Pasajero, 2=Conductor (ajústalo a tu mapping real)
     } on DioException catch (e) {
@@ -75,149 +79,62 @@ class AuthService {
 
 
 
+// REGISTRO: crea usuario pasajero (rolId=2) y devuelve el JSON de la API
+Future<Map<String, dynamic>> registerPassenger({
+  required String nombre,
+  required String apellido,
+  required String ci,
+  required String telefono,
+  required int edad,
+  required String correo,
+  required String password,
+  int rolId = 2, // pasajero por defecto
+}) async {
+  try {
+    final body = {
+      'nombre': nombre,
+      'apellido': apellido,
+      'ci': ci,
+      'telefono': telefono,
+      'edad': edad,
+      'correo': correo,
+      'password': password,
+      'rolId': rolId,
+    };
 
-    // --------- PHONE OTP (2 pasos) ----------
-  // Inicia OTP por SMS (para login o registro)
-  // Future<void> startPhoneOtp(String phone) async {
-  //   final normalized = Validators.normalizeBoPhone(phone);
-  //   if (K.useMock) {
-  //     await Future.delayed(const Duration(milliseconds: 300));
-  //     return;
-  //   }
-  //   try {
-  //     await _http.post('/auth/otp/start', data: {'phone': normalized},
-  //         options: Options(headers: {'Authorization': null}));
-  //   } on DioException catch (e) {
-  //     throw ApiException(e.response?.data?['message'] ?? 'No se pudo enviar OTP', status: e.response?.statusCode);
-  //   }
+    // Logs útiles
+    debugPrint('[REGISTER] POST ${ApiClient.dio.options.baseUrl}/usuarios/crear');
+    debugPrint('[REGISTER] body: {nombre:$nombre, apellido:$apellido, ci:$ci, tel:$telefono, edad:$edad, correo:$correo, rolId:$rolId, password:${password}}');
+
+    final resp = await ApiClient.dio.post('/usuarios/crear',
+        data: body,
+        options: Options(headers: {'Authorization': null})); // registro no necesita bearer
+
+    final data = (resp.data as Map).cast<String, dynamic>();
+    debugPrint('[REGISTER] status=${resp.statusCode} userName=${data['userName']} id=${data['id']}');
+    return data;
+  } on DioException catch (e) {
+    final status = e.response?.statusCode;
+    final body = e.response?.data;
+    debugPrint('[REGISTER][DIO ERROR] status=$status body=$body');
+
+    String msg = 'No se pudo registrar';
+    if (body is Map && body['message'] != null) {
+      msg = body['message'].toString();
+    } else if (status == 409) {
+      msg = 'Ese correo/CI ya está registrado';
+    } else if (status == 500) {
+      msg = 'Error interno del servidor';
+    }
+    throw Exception(msg);
+  } catch (e) {
+    debugPrint('[REGISTER][ERROR] $e');
+    throw Exception('Error de red: $e');
   }
-
-    // Verifica OTP (devuelve y guarda tokens)
-  // Future<void> verifySmsCode(String phone, String code) async {
-  //   final normalized = Validators.normalizeBoPhone(phone);
-  //   if (K.useMock) {
-  //     await Future.delayed(const Duration(milliseconds: 200));
-  //     if (code.trim() != '123456') throw ApiException('Código incorrecto (MOCK)');
-  //     await ApiClient.setTokens(accessToken: 'mock-access', refreshToken: 'mock-refresh');
-  //     return;
-  //   }
-  //   try {
-  //     final resp = await _http.post('/auth/otp/verify',
-  //         data: {'phone': normalized, 'code': code.trim()},
-  //         options: Options(headers: {'Authorization': null}));
-  //     await ApiClient.setTokens(
-  //       accessToken: resp.data['access_token'],
-  //       refreshToken: resp.data['refresh_token'],
-  //     );
-  //   } on DioException catch (e) {
-  //     throw ApiException(e.response?.data?['message'] ?? 'OTP inválido', status: e.response?.statusCode);
-  //   }
-  // }
+}
 
 
-
-
-
-
-
-
- /* ---------- REGISTRO ---------- */
-
-  // Future<void> signUpWithEmailPassword({
-  //   required String email,
-  //   required String password,
-  //   String? phone,
-  //   String? ci,
-  //   String? fullName,
-  //   String role = 'passenger',
-  // }) async {
-  //   if (K.useMock) {
-  //     await Future.delayed(const Duration(milliseconds: 300));
-  //     if (!Validators.looksLikeEmail(email) || password.length < 6) {
-  //       throw ApiException('Datos inválidos (MOCK)');
-  //     }
-  //     return;
-  //   }
-  //   try {
-  //     await _http.post('/auth/register', data: {
-  //       'email': email.trim(),
-  //       'password': password,
-  //       'phone': (phone ?? '').isEmpty ? null : Validators.normalizeBoPhone(phone!),
-  //       'ci': ci,
-  //       'full_name': fullName,
-  //       'role': role,
-  //     }, options: Options(headers: {'Authorization': null}));
-  //   } on DioException catch (e) {
-  //     throw ApiException(e.response?.data?['message'] ?? 'No se pudo registrar', status: e.response?.statusCode);
-  //   }
-  // }
-
-    // En muchos backends: registro por teléfono = start OTP + luego verify
-  // Future<void> signUpWithPhone(String phone) async {
-  //   // si tu backend requiere endpoint distinto para signup, cámbialo
-  //   await startPhoneOtp(phone);
-  // }
-
-
-  // Future<void> confirmPhoneSignup({required String phone, required String code}) async {
-  //   await verifySmsCode(phone, code); // y luego upsertProfile()
-  // }
-
-
-    /* ---------- PERFIL ---------- */
-
-  // Future<AppUserProfile?> getMyProfile() async {
-  //   if (K.useMock) {
-  //     await Future.delayed(const Duration(milliseconds: 200));
-  //     return AppUserProfile(
-  //       id: 'mock-1',
-  //       fullName: 'Usuario Demo',
-  //       email: 'demo@correo.com',
-  //       phone: '+59170000000',
-  //       role: UserType.driver,
-  //     );
-  //   }
-  //   try {
-  //     final resp = await _http.get('/profiles/me');
-  //     return AppUserProfile.fromMap(resp.data as Map<String, dynamic>);
-  //   } on DioException catch (e) {
-  //     if (e.response?.statusCode == 404) return null;
-  //     throw ApiException('No se pudo obtener tu perfil');
-  //   }
-  // }
-
-  //   Future<void> upsertProfile({required String role, required String fullName, String? ci}) async {
-  //   if (K.useMock) {
-  //     await Future.delayed(const Duration(milliseconds: 200));
-  //     return;
-  //   }
-  //   try {
-  //     await _http.put('/profiles/me', data: {
-  //       'full_name': fullName.isEmpty ? 'Usuario' : fullName,
-  //       'role': role,
-  //       if (ci != null) 'ci': ci,
-  //     });
-  //   } on DioException {
-  //     throw ApiException('No se pudo guardar el perfil');
-  //   }
-  // }
-
-  // Future<void> updateProfileName(String fullName) => upsertProfile(role: 'passenger', fullName: fullName);
-
-
-    /* ---------- LOGOUT ---------- */
-
-  // Future<void> signOut() async {
-  //   try {
-  //     if (!K.useMock) {
-  //       await _http.post('/auth/logout', data: {'refresh_token': await _readRefresh()});
-  //     }
-  //   } catch (_) {
-  //     // no bloquees el logout si el endpoint falla
-  //   } finally {
-  //     await ApiClient.clearTokens();
-  //   }
-  // }
+   
 
   Future<String?> _readRefresh() async => await const FlutterSecureStorage().read(key: 'refresh_token');
 
@@ -225,3 +142,4 @@ class AuthService {
 
 // }
 
+}

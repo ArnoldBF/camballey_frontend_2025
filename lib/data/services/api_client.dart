@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/constants.dart';
 
@@ -11,6 +13,33 @@ class ApiClient {
   // static bool _initialized = false;
   // static bool _isRefreshing = false;
   // static final List<Completer<void>> _refreshQueue = [];
+
+  static String? get token => _token;
+  static Future<String?> readToken() => _secure.read(key: 'access_token');
+
+
+  static int? get currentUserId {
+    final t = _token;
+    if (t == null) return null;
+    return _extractUserIdFromJwt(t);
+  }
+
+  static int? _extractUserIdFromJwt(String token) {
+  try {
+    final parts = token.split('.');
+    if (parts.length != 3) return null;
+    final payload = String.fromCharCodes(
+      base64Url.decode(base64Url.normalize(parts[1])),
+    );
+    final Map<String, dynamic> claims = json.decode(payload);
+    final sub = claims['sub'];
+    if (sub is int) return sub;
+    return int.tryParse(sub?.toString() ?? '');
+  } catch (e) {
+    debugPrint('[JWT] parse error: $e');
+    return null;
+  }
+}
 
   static Future<void> init() async {
       dio = Dio(BaseOptions(

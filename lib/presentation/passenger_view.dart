@@ -1,9 +1,12 @@
+import 'package:camballey_frontend_2025/data/services/api_client.dart';
 import 'package:camballey_frontend_2025/data/services/auth_service.dart';
+import 'package:camballey_frontend_2025/data/services/wallet_service.dart';
 import 'package:flutter/material.dart';
 
 // nuevas importaciones
 import 'package:camballey_frontend_2025/presentation/payments/popup_pago.dart';
 import 'package:camballey_frontend_2025/presentation/payments/confirm_pago_view.dart';
+import 'package:camballey_frontend_2025/data/services/auth_service.dart' show currentFullName;
 
 class PassengerView extends StatelessWidget {
   const PassengerView({super.key});
@@ -12,6 +15,8 @@ class PassengerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final name = currentFullName ?? 'Usuario';
+    print(name);
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
       appBar: AppBar(
@@ -28,9 +33,9 @@ class PassengerView extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         children: [
-          const _Header(name: 'Lourdes Fátima', role: 'Estudiante'),
+          _Header(name: name, role: 'Estudiante'),
           const SizedBox(height: 14),
-          const _BalanceCard(balance: '43,50 Bs.', account: '351957'),
+          _BalanceCard(account: '43,50 Bs.', userId: 351957),
           const SizedBox(height: 14),
 
           _ActionButtons(
@@ -116,62 +121,95 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _BalanceCard extends StatelessWidget {
-  final String balance;
-  final String account;
-  const _BalanceCard({required this.balance, required this.account});
+class _BalanceCard extends StatefulWidget {
+       final String account;   
+   // ej: 'Cuenta 123-456'
+       final int? userId;      
+      const _BalanceCard({super.key, required this.account, this.userId});
+  @override
+  State<_BalanceCard> createState() => _BalanceCardState();
+}
+
+class _BalanceCardState extends State<_BalanceCard> {
+  late Future<double> _future;
+  // double? balance;
+  
+  @override
+  void initState() {
+    super.initState();
+    final svc = WalletService();
+    // debugPrint('[BALANCE] param.userId=${widget.userId} token.userId=${ApiClient.currentUserId}');
+    // _future = (widget.userId != null)
+    //     ? svc.getBalanceByUserId(widget.userId!)
+    //     : svc.getMyBalance();
+      debugPrint('[BALANCE] forcing token id. param.userId=${widget.userId} token.userId=${ApiClient.currentUserId}');
+    _future = svc.getMyBalance(); // <-- SIEMPRE usa el ID del JWT
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 180,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF5B3CF6), Color(0xFF6E7BF6)],
-          begin: Alignment.bottomLeft,
-          end: Alignment.topRight,
-        ),
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 18,
-            color: Color(0x335B3CF6),
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(18),
-      child: Stack(
-        children: [
-          // “línea” simple como decoración
-          Positioned.fill(
-            child: IgnorePointer(
-              child: CustomPaint(painter: _LinePainter()),
+    return FutureBuilder<double>(
+      future: _future,
+      builder: (context, snap) {
+        final isLoading = snap.connectionState == ConnectionState.waiting;
+        final hasError  = snap.hasError;
+        final amount    = snap.data ?? 0.0;
+
+        final balanceText = hasError
+            ? 'Error'
+            : isLoading
+                ? 'Cargando...'
+                : 'Bs ${amount.toStringAsFixed(2)}';
+
+        return Container(
+          height: 180,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF5B3CF6), Color(0xFF6E7BF6)],
+              begin: Alignment.bottomLeft,
+              end: Alignment.topRight,
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Saldo', style: TextStyle(color: Colors.white70)),
-              const SizedBox(height: 6),
-              Text(balance,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800)),
-              const Spacer(),
-              const Text('Cuenta', style: TextStyle(color: Colors.white70)),
-              Text(account, style: const TextStyle(color: Colors.white)),
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: const [
+              BoxShadow(
+                blurRadius: 18,
+                color: Color(0x335B3CF6),
+                offset: Offset(0, 10),
+              ),
             ],
           ),
-          // avatar decorativo
-          const Positioned(
-            right: 8,
-            bottom: 8,
-            child: Icon(Icons.person, size: 80, color: Colors.white24),
+          padding: const EdgeInsets.all(18),
+          child: Stack(
+            children: [
+              // decoración
+              Positioned.fill(child: IgnorePointer(child: CustomPaint(painter: _LinePainter()))),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Saldo', style: TextStyle(color: Colors.white70)),
+                  const SizedBox(height: 6),
+                  Text(
+                    balanceText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const Spacer(),
+                  const Text('Cuenta', style: TextStyle(color: Colors.white70)),
+                  Text(widget.account, style: const TextStyle(color: Colors.white)),
+                ],
+              ),
+              const Positioned(
+                right: 8,
+                bottom: 8,
+                child: Icon(Icons.person, size: 80, color: Colors.white24),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
