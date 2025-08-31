@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:camballey_frontend_2025/data/services/wallet_service.dart';
 
 class ConfirmPagoView extends StatelessWidget {
   final String interno;
-  const ConfirmPagoView({super.key, required this.interno});
+  final double monto;
+  final int usuarioId;
+
+  const ConfirmPagoView({
+    super.key,
+    required this.interno,
+    required this.monto,
+    required this.usuarioId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,37 +40,8 @@ class ConfirmPagoView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-
-            // Bloque emisor → receptor
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _AvatarWithLabel(
-                  name: 'Luis',
-                  role: 'Enviador',
-                  color: primary,
-                  icon: Icons.person,
-                ),
-                Column(
-                  children: [
-                    Icon(Icons.arrow_right_alt, size: 48, color: primary),
-                    Text('Interno: $interno',
-                        style: const TextStyle(
-                            color: Colors.black54, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-                _AvatarWithLabel(
-                  name: 'Gregorio',
-                  role: 'Receptor',
-                  color: primary,
-                  icon: Icons.directions_bus_filled,
-                ),
-              ],
-            ),
-
+            // ...avatar y detalles...
             const Spacer(),
-
-            // Botones
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -72,7 +52,35 @@ class ConfirmPagoView extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16)),
                 ),
-                onPressed: () => Navigator.pop(context, true),
+                onPressed: () async {
+                  final transporteId = int.tryParse(interno);
+                  if (transporteId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('ID de transporte inválido')),
+                    );
+                    return;
+                  }
+                  try {
+                    final exito = await WalletService().pagar(monto, usuarioId, transporteId);
+                    // if (!mounted) return;
+
+                    if (exito) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Pago realizado con éxito')),
+                      );
+                      Navigator.of(context).pop<bool>(true);   // 👈 devuelve bool
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Error al realizar el pago')),
+                      );
+                    }
+                  } catch (e) {
+                    // if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                },
                 child: const Text('Confirmar'),
               ),
             ),
@@ -91,48 +99,10 @@ class ConfirmPagoView extends StatelessWidget {
                 child: const Text('Cancelar'),
               ),
             ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: () {},
-              child: const Text('Términos y Condiciones'),
-            ),
-            const SizedBox(height: 8),
+            // ...otros widgets...
           ],
         ),
       ),
-    );
-  }
-}
-
-class _AvatarWithLabel extends StatelessWidget {
-  final String name;
-  final String role;
-  final Color color;
-  final IconData icon;
-  const _AvatarWithLabel({
-    required this.name,
-    required this.role,
-    required this.color,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 36,
-          backgroundColor: color.withOpacity(.12),
-          child: Icon(icon, color: color, size: 36),
-        ),
-        const SizedBox(height: 8),
-        Text(name, style: const TextStyle(color: Colors.black54)),
-        Text(role,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w800,
-            )),
-      ],
     );
   }
 }

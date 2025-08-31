@@ -138,22 +138,22 @@ class _MultiPagosPageState extends State<MultiPagosPage> {
   }
 
   Future<void> _goConfirm() async {
-  final interno = _internoCtrl.text.trim();
-  final ok = await Navigator.push<bool>(
-    context,
-    MaterialPageRoute(builder: (_) => ConfirmPagoView(interno: interno)),
-  );
+  // final interno = _internoCtrl.text.trim();
+  // final ok = await Navigator.push<bool>(
+  //   context,
+  //   MaterialPageRoute(builder: (_) => ConfirmPagoView(interno: interno, monto: monto, usuarioId: usuarioId)),
+  // );
 
-  if (ok == true && mounted) {
-    // Muestra check y lo cierra solo
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const _AutoDismissSuccessDialog(),
-    );
-    // Al cerrarse el diálogo, vuelve al home (PassengerView)
-    if (mounted) Navigator.pop(context);
-  }
+  // if (ok == true && mounted) {
+  //   // Muestra check y lo cierra solo
+  //   await showDialog<void>(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (_) => const _AutoDismissSuccessDialog(),
+  //   );
+  //   // Al cerrarse el diálogo, vuelve al home (PassengerView)
+  //   if (mounted) Navigator.pop(context);
+  // }
 }
 
 

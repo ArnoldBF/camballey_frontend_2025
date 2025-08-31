@@ -76,6 +76,10 @@ class SocketService {
     _socket!.onDisconnect((_) => debugPrint('[SOCKET] disconnected'));
   }
 
+  void on(String event, Function(dynamic data) handler) {
+  _socket?.on(event, handler);
+}
+
   void dispose() {
     _socket?.dispose();
     _socket = null;

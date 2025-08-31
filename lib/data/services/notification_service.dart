@@ -12,6 +12,9 @@ class NotificationService {
   static const String _channelName = 'Pagos';
   static const String _channelDesc = 'Alertas de pagos y saldos';
 
+  // ignore: prefer_typing_uninitialized_variables
+  static var instance;
+
   Future<void> init() async {
     if (_inited) return;
 

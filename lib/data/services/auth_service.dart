@@ -140,6 +140,7 @@ Future<void> loginWithGoogle() async {
 
   try {
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    
     if (!launched) {
       throw Exception('No se pudo abrir la URL de Google Auth');
     }

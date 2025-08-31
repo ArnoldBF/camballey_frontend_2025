@@ -17,7 +17,8 @@ class PassengerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = currentFullName ?? 'Usuario';
-    print(name);
+    final monto = 2.5; // Puedes obtenerlo dinámicamente si lo necesitas
+    final usuarioId = ApiClient.currentUserId ?? 0; // Usa el ID del usuario autenticado
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
       appBar: AppBar(
@@ -47,23 +48,56 @@ class PassengerView extends StatelessWidget {
               );
             },
             onPagar: () async {
-              final interno = await showPopupPago(context);
+              final interno = await showPopupPago(context, monto: monto, usuarioId: usuarioId);
               if (interno == null || interno.isEmpty) return;
 
               if (!context.mounted) return;
               final confirmed = await Navigator.push<bool>(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => ConfirmPagoView(interno: interno),
+                   builder: (_) => ConfirmPagoView(
+                    interno: interno,
+                    monto: monto,
+                    usuarioId: usuarioId,
+                  ),
                 ),
               );
 
-              if (!context.mounted) return;
-              if (confirmed == true) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Pago confirmado')),
-                );
-              }
+          //   final interno = await showPopupPago(context, monto: monto, usuarioId: usuarioId);
+          //   if (interno == null) return;
+
+          //   // Confirmación y pago
+          //   final result = await Navigator.push<Map<String, dynamic>?>(
+          //     context,
+          //     MaterialPageRoute(
+          //       builder: (_) => ConfirmPagoView(
+          //         interno: interno,
+          //         monto: monto,
+          //         usuarioId: usuarioId,
+          //     ),
+          //   ),
+          // );
+
+          // if (!context.mounted) return;
+
+          //    // Si el pago fue exitoso y tienes respuesta con saldo abonado
+          //     final confirmed = await Navigator.push<bool>(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (_) => ConfirmPagoView(
+          //           interno: interno,
+          //           monto: monto,
+          //           usuarioId: usuarioId,
+          //         ),
+          //       ),
+          //     );
+
+          //     if (!context.mounted) return;
+          //     if (confirmed == true) {
+          //       ScaffoldMessenger.of(context).showSnackBar(
+          //         const SnackBar(content: Text('Pago confirmado')),
+          //       );
+          //     }
             },
           ),
 

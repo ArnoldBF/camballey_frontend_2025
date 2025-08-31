@@ -12,7 +12,6 @@ class WalletService {
   Future<double> getBalanceByUserId(int userId) async {
     final resp = await _http.get('/saldo/$userId');
     // respuesta: { "id": 5, "monto": "1000", ... }
-    print('hioal');
     print(resp);
     final data = resp.data as Map<String, dynamic>;
     final montoStr = data['monto']?.toString() ?? '0';
@@ -42,4 +41,34 @@ class WalletService {
       return null;
     }
   }
+
+  Future<bool> pagar(double monto, int usuarioId, int transporteId) async {
+  final dio = Dio();
+  final url = 'https://camballeybacked2025-production.up.railway.app/api/viaje/crear';
+
+  final token = await ApiClient.token;
+  final body = {
+    "monto": monto,
+    "usuarioId": usuarioId,
+    "transporteId": transporteId,
+  };
+
+  print('Realizando pago: $body');
+   try {
+      final response = await dio.post(
+        url,
+        data: body,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+      return response.statusCode == 201;
+    } catch (e) {
+      debugPrint('[Pago Error] $e');
+      return false;
+    }
+}
+
 }
