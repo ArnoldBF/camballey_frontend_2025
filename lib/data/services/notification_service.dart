@@ -7,15 +7,17 @@ class NotificationService {
   final _fln = FlutterLocalNotificationsPlugin();
   bool _inited = false;
 
-  // ✅ constantes de canal
-  static const String _channelId = 'pagos_channel';
+  // Canal (Android 8+)
+  static const String _channelId   = 'pagos_channel';
   static const String _channelName = 'Pagos';
   static const String _channelDesc = 'Alertas de pagos y saldos';
 
   Future<void> init() async {
     if (_inited) return;
+
     const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidInit);
+
     await _fln.initialize(initSettings);
     _inited = true;
   }
