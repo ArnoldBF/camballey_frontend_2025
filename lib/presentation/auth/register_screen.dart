@@ -127,6 +127,26 @@ Future<void> _showSuccessAndGoLogin(String userName) async {
   Navigator.of(context).pushNamedAndRemoveUntil(r.Routes.login, (_) => false);
 }
 
+  Future<void> _loginWithGoogle() async {
+        setState(() => _loading = true);
+        try {
+          await _auth.loginWithGoogle();
+          if (mounted) {
+            Navigator.of(context).pushNamedAndRemoveUntil(r.Routes.login, (_) => false);
+          }
+        } catch (e) {
+          _snack('Error autenticando con Google');
+          debugPrint('[Google Auth Error] $e');
+        } finally {
+          if (mounted) setState(() => _loading = false);
+        }
+  }
+
+  Future<void> _loginWithFacebook() async {
+    // Aquí va la lógica de autenticación con Facebook
+    _snack('Función Facebook aún no implementada');
+  }
+
 
    @override
   Widget build(BuildContext context) {
@@ -153,6 +173,39 @@ Future<void> _showSuccessAndGoLogin(String userName) async {
                       Text('¡Hola! Regístrate para empezar.',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
                       const SizedBox(height: 16),
+                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              icon: Icon(Icons.g_mobiledata, color: Colors.red, size: 28),
+                              label: const Text('Google'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.black87,
+                                side: const BorderSide(color: Color(0xFF2563EB)),
+                                minimumSize: const Size(0, 48),
+                                textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              onPressed: _loading ? null : _loginWithGoogle,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              icon: Icon(Icons.facebook, color: Color(0xFF2563EB), size: 28),
+                              label: const Text('Facebook'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Color(0xFF2563EB),
+                                side: const BorderSide(color: Color(0xFF2563EB)),
+                                minimumSize: const Size(0, 48),
+                                textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              onPressed: _loading ? null : _loginWithFacebook,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
 
                       Row(
                         children: [ 

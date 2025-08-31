@@ -1,3 +1,6 @@
+import 'package:camballey_frontend_2025/data/models/trip.dart';
+import 'package:camballey_frontend_2025/data/services/auth_service.dart';
+import 'package:camballey_frontend_2025/data/services/trip_service.dart';
 import 'package:flutter/material.dart';
 
 import 'widgets/header.dart';
@@ -8,11 +11,31 @@ import 'widgets/account_menu.dart';
 // (Opcional para futuros usos)
 // import 'widgets/action_buttons.dart';
 
-class DriverView extends StatelessWidget {
+class DriverView extends StatefulWidget {
   const DriverView({super.key});
 
   @override
+  State<DriverView> createState() => _DriverViewState();
+}
+
+class _DriverViewState extends State<DriverView> {
+
+  late Future<List<Trip>> _future;
+  
+   @override
+  void initState() {
+    super.initState();
+    _future = TripService().getMyTrips();
+  }
+
+  String _formatBs(num v) => 'Bs ${v.toStringAsFixed(2)}';
+
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  @override
   Widget build(BuildContext context) {
+    final name = currentFullName ?? 'Usuario';
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
       appBar: AppBar(
@@ -28,8 +51,8 @@ class DriverView extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        children: const [
-          DriverHeader(name: 'José Armando', line: 'Línea 74'),
+        children:  [
+          DriverHeader(name: name, line: 'Línea 74'),
           SizedBox(height: 14),
           EarningsCard(
             title: 'Viaje N°3',

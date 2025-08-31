@@ -2,6 +2,7 @@ import 'package:camballey_frontend_2025/data/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'api_client.dart';
 import '../../core/utils/validators.dart';
 import 'package:dio/dio.dart';
@@ -133,6 +134,20 @@ Future<Map<String, dynamic>> registerPassenger({
   }
 }
 
+Future<void> loginWithGoogle() async {
+   const url = 'https://camballeybacked2025-production.up.railway.app/api/auth/google';
+  final uri = Uri.parse(url);
+
+  try {
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched) {
+      throw Exception('No se pudo abrir la URL de Google Auth');
+    }
+  } catch (e) {
+    debugPrint('[Google Auth Error] $e');
+    // Muestra un mensaje al usuario
+  }
+  }
 
    
 

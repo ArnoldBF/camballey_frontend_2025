@@ -69,8 +69,23 @@ Future<bool?> _confirmLogout(BuildContext context) {
       title: const Text('Cerrar sesión'),
       content: const Text('¿Deseas salir de tu cuenta?'),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Salir')),
+        ElevatedButton(
+          style: TextButton.styleFrom(
+            foregroundColor: Color(0xFF5B3CF6), // color primario
+            textStyle: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Color(0xFF5B3CF6),
+            textStyle: const TextStyle(fontWeight: FontWeight.bold),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+          ),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('Salir'),
+        ),
       ],
     ),
   );
